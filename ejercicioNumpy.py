@@ -137,12 +137,13 @@ class Model():
 ################################################################################
 ################################################################################
 
+#Get current working directory
 cwd = os.path.dirname(__file__)
-#curDir = os.path.join(curFile)
 
 # Representacion de las etiquetas 0 y 1 respectivamente
 classes = ["Galgo afgano","Bedlington"]
 
+# Open data sets for training & test
 trainSet = h5py.File(cwd + '/dogs_train.h5')
 testSet = h5py.File(cwd + '/dogs_test.h5')
 
@@ -158,6 +159,7 @@ print("\n\n Finding orignal range")
 print("Max: ", np.max(test_x))
 print("Min: ", np.min(test_x))
 
+# Normalize data
 train_x = train_x / 255.
 test_x = test_x/ 255.
 
@@ -167,6 +169,7 @@ print('train_images max =', train_x.max())
 print('test_images min =', test_x.min())
 print('test_images max =', test_x.max())
 
+# flatten image arrays to work with vectors of 1 dimension
 n_img, imgW, imgH, n_colors = train_x.shape
 train_x = train_x.reshape(n_img, imgW * imgH * n_colors).T
 
@@ -176,15 +179,18 @@ test_x = test_x.reshape(n_img, imgW * imgH * n_colors).T
 test_y = np.expand_dims(test_y, 0)
 train_y = np.expand_dims(train_y, 0)
 
+# getting number of images in datasets
 print("\n\n Getting number of immages ")
 y_train = [list(train_y[0]).count(0), list(train_y[0]).count(1)]
 y_test = [list(test_y[0]).count(0), list(test_y[0]).count(1)]
-#plt.bar(classes, y_train)
+#plt.bar(classes, y_train) #uncomment to print 
 #plt.bar(classes, y_test)
 #plt.show()  // uncomment to show plot
 
 print("\n\n Testing sigmoid function, expected: [0.5        0.88079708]")
 print("Result:")
+
+#dummy data to verify sigmoid function is working
 print (str(sigmoid(np.array([0,2]))))
 
 print("\n\n Testing propagate function, expected:"
@@ -194,6 +200,7 @@ print("\n\n Testing propagate function, expected:"
     "\n\tcost = 5.801545319394553")
 print("Result:")
 
+#dummy data to verify propagate function is working
 w =  np.array([[1.], [2.]])
 b = 2.
 X =np.array([[1., 2., -1.], [3., 4., -3.2]])
@@ -211,19 +218,23 @@ print("\n\n Testing optimize function, expected:"
     "\n\tCosts = [array(5.80154532)]")
 print("Result:")
 
+#dummy data to verify optmize function is working
 params, costs = optimize(w, b, X, Y, num_iterations=100, learning_rate=0.009, print_cost=False)
 
 print ("w = " + str(params["w"]))
 print ("b = " + str(params["b"]))
 print("Costs = " + str(costs))
 
+#Create an instance of our model
 dogModel = Model("logistic_regression")
 
+#Define learning rate and number of iterations, and start trainning
 num_iterations = 1000
 lr = 0.003
 print("\n\n Trying out model:")
 dogModel.fit(train_x,train_y,test_x,test_y,num_iterations,lr,True)
 
+#Plot the costs performance vs iterations
 costs = dogModel.costs
 plt.plot(costs)
 plt.ylabel('cost')
@@ -232,6 +243,7 @@ plt.title("Learning rate =" + str(dogModel.lr))
 plt.show()
 
 print("\n\n Testing model with images:")
+# Testing trainned model using images out of original data set
 test_imgs = np.empty((5, imgW * imgH * n_colors))
 test_imgs[0] = getArrayFromImage(cwd + "/g_1.jpg", imgW * imgH * n_colors)
 test_imgs[1] = getArrayFromImage(cwd + "/b_1.jpg", imgW * imgH * n_colors)
@@ -242,6 +254,7 @@ test_imgs = test_imgs.T
 
 y_hat = dogModel.predict(test_imgs, rounded=False)
 
+# Print results of testing
 for index, y in enumerate(y_hat[0]):
     print(f"La predicion de la imagen {index+1} es: {classes[int(y)]} {y}")
     
